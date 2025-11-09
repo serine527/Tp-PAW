@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Navigation Bar</title>
+  <style>
+    /*Mobile first (default styles)*/
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+      background-color: #f9f9f9;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-size: 1.5em;
+    }
+
+    nav ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+      background-color:  #007bff;
+      border-radius: 5px;
+    }
+
+    nav ul li {
+      text-align: center;
+      border-bottom: 1px solid #0056b3;
+    }
+
+    nav ul li:last-child {
+      border-bottom: none;
+    }
+
+    nav ul li a {
+      display: block;
+      padding: 12px;
+      color: white;
+      text-decoration: none;
+    }
+
+    nav ul li a:hover {
+      background-color: #0056b3;
+    }
+
+    /*Tablet */
+    @media (min-width: 600px) {
+      nav ul {
+        display: flex;
+        justify-content: center;
+      }
+
+      nav ul li {
+        border: none;
+      }
+
+      nav ul li a {
+        border-right: 1px solid #0056b3;
+      }
+
+      nav ul li:last-child a {
+        border-right: none;
+      }
+    }
+
+    /* Desktop */
+    @media (min-width: 992px) {
+      h2 {
+        font-size: 2em;
+      }
+
+      nav ul li a {
+        padding: 14px 20px;
+        font-size: 1.1em;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Attendance System</h2>
+
+  <nav>
+    <ul>
+      <li><a href="#">Home</a></li>
+      <li><a href="http://127.0.0.1:5500/exo4.html">Attendance List</a></li>
+      <li><a href="http://127.0.0.1:5500/exo4(2).html">Add Student</a></li>
+      <li><a href="#">Reports</a></li>
+      <li><a href="#">Logout</a></li>
+    </ul>
+  </nav>
+
+</body>
+</html>

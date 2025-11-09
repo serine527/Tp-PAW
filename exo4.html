@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance List</title>
+  <style>
+     /*Mobile First Approach
+Definition:Design and develop for mobile devices first, then scale up for tablets and desktops.
+Why it’s useful:
+Most users browse on mobile phones.
+Forces you to prioritize essential content and create a cleaner UI.
+Improves performance on all devices.
+Easier to scale up (mobile →Start with small screens and use CSS media queries to expand.
+Favoured by Google for SEO.
+Best Practices:
+Start with small screens and use CSS media queries to expand.
+Keep design simple and focused.
+Test on real mobile devices.*/
+
+    // Mobile first (default styles)
+    body {
+      font-family: Arial, sans-serif;
+      margin: 10px;
+     
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.4em;
+      margin-bottom: 15px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9em;
+    }
+
+    th, td {
+      border: 1px solid #4f4e4e;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background-color:#007bff;
+      color:#ffffff
+    }
+
+    // Make table scrollable on small screens
+    .table-container {
+      overflow-x: auto;
+    }
+
+    /*Tablet (min-width: 600px)*/
+    @media (min-width: 600px) {
+      body {
+        margin: 20px;
+      }
+
+      h1 {
+        font-size: 1.6em;
+      }
+
+      table {
+        font-size: 1em;
+      }
+    }
+
+    /* Desktop (min-width: 992px) */
+    @media (min-width: 992px) {
+      body {
+        margin: 40px auto;
+        max-width: 900px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      table {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Attendance List</h1>
+
+  <div class="table-container">
+    <table>
+      <tr>
+        <th rowspan="2">Student ID</th>
+        <th rowspan="2">Last Name</th>
+        <th rowspan="2">First Name</th>
+        <th rowspan="2">Course</th>
+        <th colspan="2">Session Date</th>
+      </tr>
+      <tr>
+        <th>Present</th>
+        <th>Participated</th>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>Souchane</td>
+        <td>Serine</td>
+        <td>Dev web</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Slimani</td>
+        <td>cerine</td>
+        <td>Dev web</td>
+        <td><input type="checkbox"></td>
+        <td><input type="checkbox"></td>
+      </tr>
+    </table>
+  </div>
+</body>
+</html>
