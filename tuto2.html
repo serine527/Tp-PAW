@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tutorial 2 — Attendance System (JS + jQuery) — Exercise Layout Exact</title>
+  <!-- CDN libraries -->
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root{--gap:10px;--card-bg:#fff;--accent:#2563eb}
+    body{font-family:Inter, system-ui, -apple-system, Arial; background:#f3f6fb; margin:0; padding:20px; color:#0f172a}
+    h1{font-size:1.4rem;margin:0 0 12px}
+    .container{max-width:1200px;margin:0 auto}
+    .card{background:var(--card-bg);padding:16px;border-radius:10px;box-shadow:0 6px 18px rgba(15,23,42,0.06);margin-bottom:16px}
+    table{width:100%;border-collapse:collapse;font-size:0.92rem}
+    th,td{border:1px solid #e6e9ef;padding:6px;text-align:center}
+    thead th{background:#fbfcfe;font-weight:700}
+    .controls{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .btn{display:inline-block;padding:8px 12px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer}
+    .btn.secondary{background:#6b7280}
+    form .row{display:flex;gap:8px;flex-wrap:wrap}
+    form label{display:block;font-size:0.85rem}
+    form input{padding:6px;border-radius:6px;border:1px solid #d1d5db}
+    .error{color:#b91c1c;font-size:0.82rem;margin-top:4px}
+    .success{color:green}
+    .report{display:flex;gap:12px;align-items:flex-start}
+    .report-summaries{min-width:240px}
+    .highlight-hover{outline:2px solid rgba(99,102,241,0.12);background:#fbfbff}
+    .status-good{background:linear-gradient(90deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))}
+    .status-warning{background:linear-gradient(90deg, rgba(250,204,21,0.08), rgba(250,204,21,0.02))}
+    .status-bad{background:linear-gradient(90deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02))}
+    .small{font-size:0.85rem}
+    @media(max-width:980px){ table{font-size:0.8rem} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Advanced Web Programming — Tutorial 2 (Attendance System)</h1>
+
+    <div class="card" id="attendance-card">
+      <div class="controls">
+        <button class="btn" id="show-report">Show Report</button>
+        <button class="btn" id="highlight-excellent">Highlight Excellent Students</button>
+        <button class="btn secondary" id="reset-colors">Reset Colors</button>
+      </div>
+
+      <div style="overflow:auto">
+        <!-- Table structure matching exercise: Last Name | First Name | For each session: (P) and (Pa) columns -->
+        <table id="attendance-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Last Name</th>
+              <th rowspan="2">First Name</th>
+              <!-- For S1..S6 each will have two subcolumns: P and Pa -->
+              <th colspan="2">S1</th>
+              <th colspan="2">S2</th>
+              <th colspan="2">S3</th>
+              <th colspan="2">S4</th>
+              <th colspan="2">S5</th>
+              <th colspan="2">S6</th>
+              <th rowspan="2">Absences</th>
+              <th rowspan="2">Participation</th>
+            </tr>
+            <tr>
+              <!-- subheaders: P (presence) and Pa (participation) for each session -->
+              <th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Example rows matching the PDF sample -->
+            <tr>
+              <td class="ln">Ahmed</td>
+              <td class="fn">Sara</td>
+              <!-- S1 P, S1 Pa, S2 P, S2 Pa, ... -->
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td class="absences small">0 Abs</td>
+              <td class="participations small">0 Par</td>
+            </tr>
+
+            <tr>
+              <td class="ln">Yacine</td>
+              <td class="fn">Ali</td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa" checked></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa" checked></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa" checked></td>
+
+              <td class="absences small">0 Abs</td>
+              <td class="participations small">0 Par</td>
+            </tr>
+
+            <tr>
+              <td class="ln">Houcine</td>
+              <td class="fn">Rania</td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa" checked></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa" checked></td>
+
+              <td><input type="checkbox" class="s" checked></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td><input type="checkbox" class="s"></td>
+              <td><input type="checkbox" class="pa"></td>
+
+              <td class="absences small">0 Abs</td>
+              <td class="participations small">0 Par</td>
+            </tr>
+
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <div class="card">
+      <h2>Add Student</h2>
+      <form id="add-student" novalidate>
+        <div class="row">
+          <div style="flex:1;min-width:140px">
+            <label>Student ID</label>
+            <input type="text" id="sid" name="sid" />
+            <div class="error" id="err-sid"></div>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <label>Last Name</label>
+            <input type="text" id="lname" name="lname" />
+            <div class="error" id="err-lname"></div>
+          </div>
+          <div style="flex:1;min-width:140px">
+            <label>First Name</label>
+            <input type="text" id="fname" name="fname" />
+            <div class="error" id="err-fname"></div>
+          </div>
+          <div style="flex:1;min-width:200px">
+            <label>Email</label>
+            <input type="email" id="email" name="email" />
+            <div class="error" id="err-email"></div>
+          </div>
+        </div>
+        <div style="margin-top:10px">
+          <button class="btn" type="submit">Submit</button>
+          <span id="form-success" class="success" style="margin-left:10px"></span>
+        </div>
+      </form>
+    </div>
+
+    <div class="card" id="report-card" style="display:none">
+      <h2>Report</h2>
+      <div class="report">
+        <div class="report-summaries">
+          <p>Total students: <strong id="report-total">0</strong></p>
+          <p>Students with at least one present mark: <strong id="report-present">0</strong></p>
+          <p>Students with at least one participation: <strong id="report-participated">0</strong></p>
+        </div>
+        <div style="flex:1">
+          <canvas id="report-chart" style="max-width:600px"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <p class="small" style="margin-top:12px">Tip: click the P (presence) or Pa (participation) checkboxes to update counts and colors. Hover rows to see jQuery highlight; click a row (outside checkboxes) to view a message box.</p>
+
+  </div>
+
+  <script>
+    // Evaluate a row: count present (P checkboxes) and participation (Pa checkboxes)
+    function evaluateRow($tr) {
+      const presence = $tr.find('input.s');
+      const participation = $tr.find('input.pa');
+      let presentCount = 0;
+      presence.each(function(){ if (this.checked) presentCount++; });
+      const absences = presence.length - presentCount; // 6 - present
+      let partCount = 0;
+      participation.each(function(){ if (this.checked) partCount++; });
+
+      $tr.find('.absences').text(absences + ' Abs');
+      $tr.find('.participations').text(partCount + ' Par');
+
+      // color rows
+      $tr.removeClass('status-good status-warning status-bad');
+      if (absences < 3) $tr.addClass('status-good');
+      else if (absences <= 4) $tr.addClass('status-warning');
+      else $tr.addClass('status-bad');
+    }
+
+    function evaluateAll(){
+      $('#attendance-table tbody tr').each(function(){ evaluateRow($(this)); });
+    }
+
+    // Report and Chart
+    let chartInstance = null;
+    function showReport(){
+      const $rows = $('#attendance-table tbody tr');
+      const total = $rows.length;
+      let presentStudents = 0;
+      let participatedStudents = 0;
+      $rows.each(function(){
+        const $r = $(this);
+        let hasPresent = false, hasPart = false;
+        $r.find('input.s').each(function(){ if (this.checked) hasPresent = true; });
+        $r.find('input.pa').each(function(){ if (this.checked) hasPart = true; });
+        if (hasPresent) presentStudents++;
+        if (hasPart) participatedStudents++;
+      });
+
+      $('#report-total').text(total);
+      $('#report-present').text(presentStudents);
+      $('#report-participated').text(participatedStudents);
+
+      const absentOnly = total - presentStudents;
+      const data = {
+        labels: ['Students with presence','Students who participated','Students absent only'],
+        datasets:[{label:'Report',data:[presentStudents, participatedStudents, absentOnly]}]
+      };
+
+      if (chartInstance) chartInstance.destroy();
+      const ctx = document.getElementById('report-chart').getContext('2d');
+      chartInstance = new Chart(ctx, { type:'bar', data:data, options:{responsive:true, plugins:{legend:{display:false}}} });
+
+      $('#report-card').show();
+    }
+
+    // Create row matching structure (two columns per session)
+    function createRowObj(last, first){
+      const $tr = $('<tr>');
+      $tr.append('<td class="ln">'+escapeHtml(last)+'</td>');
+      $tr.append('<td class="fn">'+escapeHtml(first)+'</td>');
+      for (let i=0;i<6;i++){
+        $tr.append('<td><input type="checkbox" class="s"></td>');
+        $tr.append('<td><input type="checkbox" class="pa"></td>');
+      }
+      $tr.append('<td class="absences small">0 Abs</td>');
+      $tr.append('<td class="participations small">0 Par</td>');
+      return $tr;
+    }
+
+    function escapeHtml(str){ return String(str).replace(/[&"'<>]/g, function(s){ return ({'&':'&amp;','"':'&quot;',"'":"&#39;",'<':'&lt;','>':'&gt;'})[s]; }); }
+
+    // Validation
+    function validateForm(){
+      let ok=true;
+      const sid=$('#sid').val().trim();
+      const lname=$('#lname').val().trim();
+      const fname=$('#fname').val().trim();
+      const email=$('#email').val().trim();
+
+      if(!sid){ $('#err-sid').text('Student ID is required'); ok=false; }
+      else if(!/^[0-9]+$/.test(sid)){ $('#err-sid').text('Student ID must contain only numbers'); ok=false; }
+      else $('#err-sid').text('');
+
+      if(!lname){ $('#err-lname').text('Last name is required'); ok=false; }
+      else if(!/^[A-Za-zÀ-ÖØ-öø-ÿ \-]+$/.test(lname)){ $('#err-lname').text('Last name must contain only letters'); ok=false; }
+      else $('#err-lname').text('');
+
+      if(!fname){ $('#err-fname').text('First name is required'); ok=false; }
+      else if(!/^[A-Za-zÀ-ÖØ-öø-ÿ \-]+$/.test(fname)){ $('#err-fname').text('First name must contain only letters'); ok=false; }
+      else $('#err-fname').text('');
+
+      if(!email){ $('#err-email').text('Email is required'); ok=false; }
+      else if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){ $('#err-email').text('Enter a valid email address'); ok=false; }
+      else $('#err-email').text('');
+
+      return ok;
+    }
+
+    $(document).ready(function(){
+      evaluateAll();
+
+      // when any checkbox changes, re-evaluate row
+      $('#attendance-table').on('change','input.s, input.pa', function(){ evaluateRow($(this).closest('tr')); });
+
+      // hover highlight
+      $('#attendance-table').on('mouseenter','tbody tr', function(){ $(this).addClass('highlight-hover'); });
+      $('#attendance-table').on('mouseleave','tbody tr', function(){ $(this).removeClass('highlight-hover'); });
+
+      // click row (avoid input clicks)
+      $('#attendance-table').on('click','tbody tr', function(e){ if($(e.target).is('input')) return; const lname=$(this).find('.ln').text(); const fname=$(this).find('.fn').text(); const absText=$(this).find('.absences').text(); alert('Student: '+fname+' '+lname+'\\nAbsences: '+absText); });
+
+      // add student
+      $('#add-student').on('submit', function(e){ e.preventDefault(); $('#form-success').text(''); if(!validateForm()) return; const lname=$('#lname').val().trim(); const fname=$('#fname').val().trim(); const $new=createRowObj(lname,fname); $('#attendance-table tbody').append($new); evaluateRow($new); $('#form-success').text('Student successfully added.'); $('#sid,#lname,#fname,#email').val(''); setTimeout(()=>$('#form-success').fadeOut(300).text('').show(),3000); });
+
+      // show report
+      $('#show-report').on('click', function(){ showReport(); });
+
+      // highlight excellent
+      $('#highlight-excellent').on('click', function(){ $('#attendance-table tbody tr').each(function(){ const $r=$(this); const absText=$r.find('.absences').text(); const abs=parseInt(absText) || 0; if(abs<3){ $r.fadeTo(250,0.4,function(){ $r.addClass('status-good'); $r.fadeTo(250,1); }); } }); });
+
+      // reset colors
+      $('#reset-colors').on('click', function(){ $('#attendance-table tbody tr').removeClass('status-good status-warning status-bad'); evaluateAll(); });
+
+      evaluateAll();
+    });
+  </script>
+</body>
+</html>
