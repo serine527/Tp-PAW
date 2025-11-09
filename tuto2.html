@@ -46,7 +46,7 @@
       </div>
 
       <div style="overflow:auto">
-        <!-- Table structure matching exercise: Last Name | First Name | For each session: (P) and (Pa) columns -->
+        
         <table id="attendance-table">
           <thead>
             <tr>
@@ -63,7 +63,7 @@
               <th rowspan="2">Participation</th>
             </tr>
             <tr>
-              <!-- subheaders: P (presence) and Pa (participation) for each session -->
+              
               <th>P</th><th>Pa</th>
               <th>P</th><th>Pa</th>
               <th>P</th><th>Pa</th>
@@ -73,7 +73,7 @@
             </tr>
           </thead>
           <tbody>
-            <!-- Example rows matching the PDF sample -->
+           
             <tr>
               <td class="ln">Ahmed</td>
               <td class="fn">Sara</td>
@@ -209,7 +209,7 @@
   </div>
 
   <script>
-    // Evaluate a row: count present (P checkboxes) and participation (Pa checkboxes)
+    // count present (P checkboxes) and participation (Pa checkboxes)
     function evaluateRow($tr) {
       const presence = $tr.find('input.s');
       const participation = $tr.find('input.pa');
@@ -266,7 +266,7 @@
       $('#report-card').show();
     }
 
-    // Create row matching structure (two columns per session)
+    
     function createRowObj(last, first){
       const $tr = $('<tr>');
       $tr.append('<td class="ln">'+escapeHtml(last)+'</td>');
@@ -319,7 +319,7 @@
       $('#attendance-table').on('mouseenter','tbody tr', function(){ $(this).addClass('highlight-hover'); });
       $('#attendance-table').on('mouseleave','tbody tr', function(){ $(this).removeClass('highlight-hover'); });
 
-      // click row (avoid input clicks)
+     
       $('#attendance-table').on('click','tbody tr', function(e){ if($(e.target).is('input')) return; const lname=$(this).find('.ln').text(); const fname=$(this).find('.fn').text(); const absText=$(this).find('.absences').text(); alert('Student: '+fname+' '+lname+'\\nAbsences: '+absText); });
 
       // add student
