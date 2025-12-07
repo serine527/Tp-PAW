@@ -1,25 +1,34 @@
 <?php
-require "db_connect.php";
-
-$conn = db_connect();
-if (!$conn) {
-    die("Connection failed");
-}
+require 'db(Final_version).php';
 
 // Get POST data
-$id = $_POST['id'] ?? '';
-$fullname = $_POST['fullname'] ?? '';
-$matricule = $_POST['matricule'] ?? '';
-$group_id = $_POST['group_id'] ?? '';
+$sid   = $_POST['sid'] ?? '';
+$lname = $_POST['lname'] ?? '';
+$fname = $_POST['fname'] ?? '';
+$email = $_POST['email'] ?? '';
 
-if (!$id || !$fullname || !$matricule || !$group_id) {
-    die("All fields are required");
+// Basic validation
+if (empty($sid)) {
+    echo "Student ID is required.";
+    exit;
 }
 
 try {
-    $stmt = $conn->prepare("UPDATE students SET fullname = ?, matricule = ?, group_id = ? WHERE id = ?");
-    $stmt->execute([$fullname, $matricule, $group_id, $id]);
-    echo "Student updated successfully";
+    // Check if student exists
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM students WHERE sid = ?");
+    $stmt->execute([$sid]);
+    if ($stmt->fetchColumn() == 0) {
+        echo "Student not found.";
+        exit;
+    }
+
+    // Update student info
+    $stmt = $pdo->prepare("UPDATE students SET lname = ?, fname = ?, email = ? WHERE sid = ?");
+    $stmt->execute([$lname, $fname, $email, $sid]);
+
+    echo "Student updated successfully.";
+
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();
 }
+?>
