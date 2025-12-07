@@ -1,5 +1,5 @@
 <?php
-require 'db.php';
+require 'db(Final_version).php';
 
 $sid = $_POST['sid'] ?? '';
 $lname = $_POST['lname'] ?? '';
