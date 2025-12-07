@@ -351,7 +351,7 @@ $(document).ready(function(){
   $('#update-student-form').submit(function(e){
     e.preventDefault();
     const data={sid:$('#update-sid').val(),lname:$('#update-lname').val(),fname:$('#update-fname').val(),email:$('#update-email').val()};
-    $.post('update_student(Final_version).php',data,function(res){ 
+    $.post('update_student.php',data,function(res){ 
       $('#update-msg').text(res); 
       const $row=$(`#attendance-table tbody tr[data-sid='${data.sid}']`); 
       if($row.length){ 
@@ -365,7 +365,7 @@ $(document).ready(function(){
   $('#delete-student-form').submit(function(e){
     e.preventDefault();
     const sid=$('#delete-sid').val();
-    $.post('delete_student(Final_version).php',{sid:sid},function(res){ 
+    $.post('delete_student.php',{sid:sid},function(res){ 
       $('#delete-msg').text(res); 
       $(`#attendance-table tbody tr[data-sid='${sid}']`).remove(); 
     });
@@ -393,7 +393,7 @@ $(document).ready(function(){
     });
 
     // Send JSON to PHP
-    fetch('take_attendance(Final_version).php', {
+    fetch('take_attand.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(attendanceData)
@@ -422,7 +422,7 @@ $(document).ready(function(){
       fname: $('#fname').val(),
       email: $('#email').val()
     };
-    $.post('add_student(Final_version).php', data, function(response){
+    $.post('add_student.php', data, function(response){
       $('#form-success').text(response);
 
       // Clear form fields
@@ -443,3 +443,4 @@ $(document).ready(function(){
 
 </body>
 </html>
+
