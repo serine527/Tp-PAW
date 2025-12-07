@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Attendance System</title>
+  <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root { --accent:#2563eb; --card-bg:#fff; }
+  body { font-family:Inter, system-ui, Arial; background:#f3f6fb; margin:0; padding:12px; color:#0f172a; }
+  h1 { font-size:1.4rem; margin-bottom:12px; }
+  .container { max-width:100%; margin:auto; padding:0 10px; }
+
+  .card { background:var(--card-bg); padding:12px; border-radius:10px; box-shadow:0 4px 12px rgba(15,23,42,0.06); margin-bottom:16px; }
+  table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+  th,td { border:1px solid #e6e9ef; padding:4px; text-align:center; font-size:0.8rem; }
+  thead th { background:#fbfcfe; font-weight:700; }
+
+  .controls { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .btn { padding:8px; border-radius:8px; border:0; background:var(--accent); color:#fff; cursor:pointer; font-size:0.85rem; width:100%; }
+  .btn.secondary { background:#6b7280; }
+
+  .error { color:#b91c1c; font-size:0.75rem; margin-top:4px; }
+  .success { color:green; font-size:0.85rem; }
+
+  .highlight-hover { outline:2px solid rgba(99,102,241,0.12); background:#fbfbff; }
+  .status-good { background:linear-gradient(90deg,rgba(34,197,94,0.08),rgba(34,197,94,0.02)); }
+  .status-warning { background:linear-gradient(90deg,rgba(250,204,21,0.08),rgba(250,204,21,0.02)); }
+  .status-bad { background:linear-gradient(90deg,rgba(239,68,68,0.06),rgba(239,68,68,0.02)); }
+
+  .small { font-size:0.75rem; }
+  #search-box { width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; margin-bottom:12px; font-size:0.85rem; }
+
+  .navbar { background: var(--accent); padding: 10px; border-radius:10px; margin-bottom:16px; }
+  .nav-container { display:flex; flex-direction:column; align-items:flex-start; gap:10px; }
+  .nav-logo { color:white; font-weight:bold; text-decoration:none; font-size:1.1rem; }
+  .nav-links { list-style:none; display:flex; flex-direction:column; gap:6px; margin:0; padding:0; width:100%; }
+  .nav-links a { color:white; text-decoration:none; padding:6px 12px; border-radius:6px; transition:background 0.3s; display:block; width:100%; text-align:center; }
+  .nav-links a:hover { background:rgba(255,255,255,0.2); }
+
+  .page { display:none; }
+
+  .add-student-card, .full-width-panel { width:100%; padding:16px; }
+
+  .form-title { text-align:center; margin-bottom:16px; font-size:1.2rem; color:var(--accent); }
+  .form-group { margin-bottom:12px; }
+  .form-group label { font-weight:600; display:block; margin-bottom:4px; font-size:0.85rem; }
+  .input-field { width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1; background:#fff; font-size:0.85rem; }
+  .input-field:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(37,99,235,0.15); }
+  .submit-btn { width:100%; padding:10px; font-size:0.9rem; border-radius:8px; margin-top:6px; }
+
+  .report { flex-direction:column; gap:16px; align-items:flex-start; }
+  .report-summaries { min-width:100%; }
+
+  .pulse { background-color: rgba(34,197,94,0.2); transition: background-color 0.3s; }
+
+  .form-row { display:flex; flex-direction:column; gap:12px; }
+
+  /* TABLE SCROLL ON SMALL SCREENS */
+  .table-container { overflow-x:auto; }
+
+  /*  TABLET & DESKTOP  */
+  @media(min-width:600px){
+    .controls { flex-direction:row; flex-wrap:wrap; }
+    .nav-container { flex-direction:row; justify-content:space-between; align-items:center; }
+    .nav-links { flex-direction:row; width:auto; gap:12px; }
+    .form-row { flex-direction:row; gap:16px; }
+    th, td { font-size:0.85rem; padding:6px; }
+    .btn { width:auto; font-size:0.9rem; padding:8px 12px; }
+    #search-box { width:260px; }
+    .report { flex-direction:row; }
+  }
+
+  @media(min-width:900px){
+    body { padding:20px; }
+    h1 { font-size:1.5rem; }
+    .card { padding:20px; }
+    .input-field { font-size:0.95rem; padding:10px; }
+    .btn { font-size:1rem; padding:10px 14px; }
+    table { font-size:0.9rem; }
+  }
+</style>
+
+</head>
+
+<body>
+
+<nav class="navbar">
+  <div class="nav-container">
+    <a href="#" class="nav-logo">Attendance System</a>
+    <ul class="nav-links">
+      <li><a href="#" class="nav-link" data-page="home">Home</a></li>
+      <li><a href="#" class="nav-link" data-page="add-student-page">Add Student</a></li>
+      <li><a href="#" class="nav-link" data-page="report-page">Report</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HOME PAGE -->
+  <div id="home" class="page">
+    <div class="card">
+      <label><strong>Search by Name:</strong></label><br>
+      <input type="text" id="search-box" placeholder="Type a name...">
+
+      <div class="controls">
+        <button class="btn" id="highlight-excellent">Highlight Excellent Students</button>
+        <button class="btn secondary" id="reset-colors">Reset Colors</button>
+        <button class="btn" id="sort-abs">Sort by Absences (Asc)</button>
+        <button class="btn" id="sort-part">Sort by Participation (Desc)</button>
+        <button class="btn" id="submit-attendance">Submit Attendance</button>
+      </div>
+
+      <div style="overflow:auto">
+        <table id="attendance-table">
+          <thead>
+            <tr>
+              <th rowspan="2">Last Name</th>
+              <th rowspan="2">First Name</th>
+              <th colspan="2">S1</th><th colspan="2">S2</th><th colspan="2">S3</th>
+              <th colspan="2">S4</th><th colspan="2">S5</th><th colspan="2">S6</th>
+              <th rowspan="2">Absences</th>
+              <th rowspan="2">Participation</th>
+              <th rowspan="2">Message</th>
+            </tr>
+            <tr>
+              <th>P</th><th>Pa</th><th>P</th><th>Pa</th><th>P</th><th>Pa</th>
+              <th>P</th><th>Pa</th><th>P</th><th>Pa</th><th>P</th><th>Pa</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p id="sort-status" style="font-weight:bold; margin-top:10px;"></p>
+    </div>
+
+    
+    <!-- UPDATE STUDENT FORM -->
+<div class="card full-width-panel">
+  <h3>Update Student</h3>
+  <form id="update-student-form">
+    <div class="form-row">
+      <div class="form-group">
+        <label>Student ID</label>
+        <input type="text" id="update-sid" class="input-field" required>
+      </div>
+<br>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" id="update-lname" class="input-field">
+      </div>
+      <br>
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="update-fname" class="input-field">
+      </div>
+<br>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="update-email" class="input-field">
+      </div>
+    </div>
+
+    <button type="submit" class="btn">Update Student</button>
+    <span id="update-msg" class="success"></span>
+  </form>
+</div>
+
+<!-- DELETE STUDENT FORM -->
+<div class="card full-width-panel">
+  <h3>Delete Student</h3>
+  <form id="delete-student-form">
+    <div class="form-row">
+      <div class="form-group" style="max-width:300px;">
+        <label>Student ID</label>
+        <input type="text" id="delete-sid" class="input-field" required>
+      </div>
+    </div>
+
+    <button type="submit" class="btn secondary">Delete Student</button>
+    <span id="delete-msg" class="success"></span>
+  </form>
+</div>
+
+  </div>
+
+  <!-- ADD STUDENT PAGE -->
+  <div id="add-student-page" class="page">
+    <div class="card add-student-card">
+      <h2 class="form-title">Add Student</h2>
+      <form id="add-student" action="add_student.php" method="POST" novalidate>
+        <div class="form-group">
+          <label>Student ID</label>
+          <input type="text" id="sid" name="sid" class="input-field">
+          <div class="error" id="err-sid"></div>
+        </div>
+        <div class="form-group">
+          <label>Last Name</label>
+          <input type="text" id="lname" name="lname" class="input-field">
+          <div class="error" id="err-lname"></div>
+        </div>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="fname" name="fname" class="input-field">
+          <div class="error" id="err-fname"></div>
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="email" name="email" class="input-field">
+          <div class="error" id="err-email"></div>
+        </div>
+        <button class="btn submit-btn" type="submit">Submit</button>
+        <span id="form-success" class="success" style="margin-left:10px;"></span>
+      </form>
+    </div>
+  </div>
+
+  <!-- REPORT PAGE -->
+  <div id="report-page" class="page">
+    <div class="card">
+      <button class="btn" id="show-report">Show Report</button>
+    </div>
+    <div class="card report" id="report-card">
+      <div class="report-summaries">
+        <p>Total students: <strong id="report-total">0</strong></p>
+        <p>Students with at least one present mark: <strong id="report-present">0</strong></p>
+        <p>Students with at least one participation: <strong id="report-participated">0</strong></p>
+        <p>Students absent only: <strong id="report-absent">0</strong></p>
+      </div>
+      <div style="flex:1">
+        <canvas id="report-chart" style="max-width:600px"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+$(document).ready(function(){
+  $('#home').show();
+
+  // PAGE NAVIGATION
+  $('.nav-link').click(function(e){ 
+    e.preventDefault(); 
+    $('.page').hide(); 
+    $('#' + $(this).data('page')).show(); 
+  });
+
+  // PARSE NUMBER
+  function parseNumberFromCell($cell){ return parseInt($cell.text().replace(/\D/g,'')) || 0; }
+
+  // EVALUATE ROW
+  function evaluateRow($tr){
+    const presence = $tr.find('input.s');//Get all presence checkboxes
+    const participation = $tr.find('input.pa');//Get all par checkboxes
+    const presentCount = presence.filter(':checked').length;
+    const partCount = participation.filter(':checked').length;
+    const absences = presence.length - presentCount;
+
+    $tr.find('.absences').text(absences + ' Abs');
+    $tr.find('.participations').text(partCount + ' Par');
+
+    $tr.removeClass('status-good status-warning status-bad');
+    if(absences<3) $tr.addClass('status-good');
+    else if(absences<=4) $tr.addClass('status-warning');
+    else $tr.addClass('status-bad');
+
+    let message='';
+    if(absences>=5) message="Excluded – too many absences – You need to participate more";
+    else if(absences>=3) message=(partCount===0?"Warning – attendance low – You need to participate more":"Warning – attendance low");
+    else message=(partCount>=3?"Good attendance – Excellent participation":partCount>=1?"Good attendance – Moderate participation":"Good attendance – You need to participate more");
+
+    $tr.find('.message').text(message);
+  }
+
+  function evaluateAll(){ 
+    $('#attendance-table tbody tr').each(function(){ evaluateRow($(this)); }); 
+  }
+
+  // REPORT
+  function showReport(){
+    const $rows=$('#attendance-table tbody tr'), total=$rows.length;
+    let totalPresence=0, totalParticipation=0, totalAbsences=0;
+    $rows.each(function(){
+      const pres=$(this).find('input.s:checked').length;
+      const part=$(this).find('input.pa:checked').length;
+      totalPresence+=pres; totalParticipation+=part; totalAbsences+=(6-pres);
+    });
+    $('#report-total').text(total);
+    $('#report-present').text(totalPresence);
+    $('#report-participated').text(totalParticipation);
+    const data={labels:['Presence','Participation','Absences'],datasets:[{label:'Attendance Overview',data:[totalPresence,totalParticipation,totalAbsences],backgroundColor:['#2563eb','#10b981','#ef4444']}]} ;
+    if(window.chartInstance) window.chartInstance.destroy();
+    const ctx=document.getElementById('report-chart').getContext('2d');
+    window.chartInstance=new Chart(ctx,{type:'bar',data:data,options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,ticks:{stepSize:1}}}}});
+    $('#report-card').show();
+  }
+
+  // CREATE ROW
+  function createRowObj(lname,fname,sid){
+    const safeSid=sid?String(sid):'';
+    const row=`<tr data-sid="${safeSid}"><td class="ln">${lname}</td><td class="fn">${fname}</td>${Array(6).fill().map(()=>`<td><input type="checkbox" class="s"></td><td><input type="checkbox" class="pa"></td>`).join('')}<td class="absences small">0 Abs</td><td class="participations small">0 Par</td><td class="message small">-</td></tr>`;
+    return $(row);
+  }
+
+  // EVENTS
+  $('#attendance-table').on('change','input.s, input.pa',function(){ evaluateRow($(this).closest('tr')); });
+  $('#attendance-table').on('mouseenter','tbody tr',function(){ $(this).addClass('highlight-hover'); }).on('mouseleave','tbody tr',function(){ $(this).removeClass('highlight-hover'); });
+  $('#attendance-table').on('click','tbody tr',function(e){ if($(e.target).is('input')) return; alert('Student: '+$(this).find('.fn').text()+' '+$(this).find('.ln').text()+'\n'+$(this).find('.absences').text()); });
+
+  $('#highlight-excellent').click(function(){ 
+    $('#attendance-table tbody tr').removeClass('pulse'); 
+    $('#attendance-table tbody tr').each(function(){ 
+      if(parseNumberFromCell($(this).find('.absences'))<3) $(this).addClass('pulse'); 
+    }); 
+  });
+
+  $('#reset-colors').click(function(){ 
+    $('#attendance-table tbody tr').removeClass('pulse status-good status-warning status-bad highlight-hover'); 
+    evaluateAll(); 
+  });
+
+  $('#search-box').on('keyup',function(){
+    const query=$(this).val().toLowerCase();
+    $('#attendance-table tbody tr').each(function(){
+      const lname=$(this).find('.ln').text().toLowerCase();
+      const fname=$(this).find('.fn').text().toLowerCase();
+      $(this).toggle(lname.includes(query)||fname.includes(query)||(lname+' '+fname).includes(query));
+    });
+  });
+
+  $('#sort-abs').click(function(){
+    const rows=$('#attendance-table tbody tr').get();
+    rows.sort((a,b)=>parseNumberFromCell($(a).find('.absences'))-parseNumberFromCell($(b).find('.absences')));
+    $('#attendance-table tbody').append(rows); 
+    $('#sort-status').text('Currently sorted by absences (ascending)');
+  });
+
+  $('#sort-part').click(function(){
+    const rows=$('#attendance-table tbody tr').get();
+    rows.sort((a,b)=>parseNumberFromCell($(b).find('.participations'))-parseNumberFromCell($(a).find('.participations')));
+    $('#attendance-table tbody').append(rows); 
+    $('#sort-status').text('Currently sorted by participation (descending)');
+  });
+
+  $('#show-report').click(showReport);
+
+  // UPDATE STUDENT
+  $('#update-student-form').submit(function(e){
+    e.preventDefault();
+    const data={sid:$('#update-sid').val(),lname:$('#update-lname').val(),fname:$('#update-fname').val(),email:$('#update-email').val()};
+    $.post('update_student(Final_version).php',data,function(res){ 
+      $('#update-msg').text(res); 
+      const $row=$(`#attendance-table tbody tr[data-sid='${data.sid}']`); 
+      if($row.length){ 
+        $row.find('.ln').text(data.lname); 
+        $row.find('.fn').text(data.fname); 
+      } 
+    });
+  });
+
+  // DELETE STUDENT
+  $('#delete-student-form').submit(function(e){
+    e.preventDefault();
+    const sid=$('#delete-sid').val();
+    $.post('delete_student(Final_version).php',{sid:sid},function(res){ 
+      $('#delete-msg').text(res); 
+      $(`#attendance-table tbody tr[data-sid='${sid}']`).remove(); 
+    });
+  });
+
+  // SUBMIT ATTENDANCE
+ $('#submit-attendance').click(function() {
+    let attendanceData = [];
+
+    $('#attendance-table tbody tr').each(function() {
+        const sid = $(this).data('sid');
+
+        // Loop through sessions S1–S6
+        for (let session = 1; session <= 6; session++) {
+            const present = $(this).find(`td:nth-child(${2 + (session - 1) * 2 + 1}) input.s`).is(':checked');
+            const participation = $(this).find(`td:nth-child(${2 + (session - 1) * 2 + 2}) input.pa`).is(':checked');
+
+            attendanceData.push({
+                sid: sid,
+                session: session,
+                present: present ? 1 : 0,
+                participation: participation ? 1 : 0
+            });
+        }
+    });
+
+    // Send JSON to PHP
+    fetch('take_attendance(Final_version).php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(attendanceData)
+    })
+    .then(res => res.text())
+    .then(msg => alert(msg))
+    .catch(err => alert("Error sending attendance"));
+});
+
+
+
+  // LOAD STUDENTS FROM DATABASE ON PAGE LOAD
+  $.getJSON('get_students(Final_version).php', function(data){
+    data.forEach(s => {
+        $('#attendance-table tbody').append(createRowObj(s.lname, s.fname, s.sid));
+    });
+    evaluateAll();
+  });
+
+  // ADD STUDENT FORM SUBMISSION (AJAX)
+  $('#add-student').submit(function(e){
+    e.preventDefault();
+    const data = {
+      sid: $('#sid').val(),
+      lname: $('#lname').val(),
+      fname: $('#fname').val(),
+      email: $('#email').val()
+    };
+    $.post('add_student(Final_version).php', data, function(response){
+      $('#form-success').text(response);
+
+      // Clear form fields
+      $('#sid').val('');
+      $('#lname').val('');
+      $('#fname').val('');
+      $('#email').val('');
+
+      // Append the new student to the table
+      $('#attendance-table tbody').append(createRowObj(data.lname, data.fname, data.sid));
+      evaluateAll();
+    });
+  });
+
+});
+</script>
+
+
+</body>
+</html>
